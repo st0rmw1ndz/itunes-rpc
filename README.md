@@ -1,5 +1,3 @@
-# iTunes RPC Asset Images
-
 ## itunes-10
 
 <img src="https://st0rmw1ndz.github.io/itunes-rpc/assets/itunes-10.png" width=150>

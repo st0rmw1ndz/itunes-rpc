@@ -2,7 +2,7 @@
 
 Shows the current track in iTunes on Discord. Best suited for tracks that have proper metadata.
 
-> **NOTE**
+> **Note**
 >
 > This is a major work-in-progress. Expect bugs and changes.
 

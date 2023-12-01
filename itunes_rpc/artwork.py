@@ -9,13 +9,13 @@ from loguru import logger
 from PIL import Image
 from pyimgur import Imgur
 
-from itunes import ItunesReport
+from .itunes import ItunesReport
 
 IMGUR_CLIENT_ID: str = "865213c7a7bab4f"
 ARTWORK_SIZE: Tuple[int, int] = (512, 512)
 
-artwork_path: Path = Path.cwd() / "data" / "artwork.png"
-hashes_path: Path = Path.cwd() / "data" / "hashes.json"
+artwork_path: Path = Path.cwd() / "data/artwork.jpg"
+hashes_path: Path = Path.cwd() / "data/hashes.json"
 
 
 def save_artwork(artwork: Any) -> bool:
@@ -44,7 +44,9 @@ def upload_artwork() -> str:
     """
     im = Imgur(IMGUR_CLIENT_ID)
     uploaded_image = im.upload_image(artwork_path)
-    return uploaded_image.link
+    artwork_url = uploaded_image.link
+    logger.info(f"Uploaded artwork to {artwork_url}")
+    return artwork_url
 
 
 def dump_hash(url: str) -> None:
@@ -52,13 +54,15 @@ def dump_hash(url: str) -> None:
 
     :param url: URL to dump
     """
-    with open(hashes_path, "r") as f:
+    with hashes_path.open(mode="r") as f:
         hashes = json.load(f)
 
     hashes[get_current_md5()] = url
 
-    with open(hashes_path, "w") as f:
+    with hashes_path.open(mode="w") as f:
         json.dump(hashes, f, indent=4)
+
+    logger.info(f"Dumped hash {get_current_md5()} to hashes file with URL {url}")
 
 
 def get_current_md5() -> str:
@@ -66,7 +70,7 @@ def get_current_md5() -> str:
 
     :return: Current MD5 hash
     """
-    with open(artwork_path, "rb") as f:
+    with artwork_path.open(mode="rb") as f:
         return hashlib.md5(f.read()).hexdigest()
 
 
@@ -75,7 +79,7 @@ def check_hash_exists() -> bool:
 
     :return: Whether or not the hash exists
     """
-    with open(hashes_path, "r") as f:
+    with hashes_path.open(mode="r") as f:
         hashes = json.load(f)
 
     return hashes.get(get_current_md5(), None) is not None
@@ -86,7 +90,7 @@ def get_current_url() -> str:
 
     :return: Current artwork URL
     """
-    with open(hashes_path, "r") as f:
+    with hashes_path.open(mode="r") as f:
         hashes = json.load(f)
 
     return hashes[get_current_md5()] if check_hash_exists() else None

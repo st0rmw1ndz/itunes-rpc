@@ -53,7 +53,6 @@ def main_loop() -> None:
     if saved_track is None:
         rpc.update_report(current_track)
         saved_track = current_track
-
     elif (
         current_track.state == PlayerState.PLAYING
         and abs(current_track.position - saved_track.position) > 5

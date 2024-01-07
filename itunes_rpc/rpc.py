@@ -1,3 +1,4 @@
+import pypresence
 from pypresence import Presence
 
 from .itunes import ItunesReport

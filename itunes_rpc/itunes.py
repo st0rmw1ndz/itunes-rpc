@@ -1,17 +1,23 @@
 __all__ = ["ItunesPlayer", "ItunesReport", "PlayerState"]
 
 import time
+import urllib.parse
 from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Union
 
 import psutil
+import pypresence
+import requests
 import win32com.client
+from bs4 import BeautifulSoup
 
 
 class PlayerState(Enum):
-    """Represents the state of the player."""
+    """Represents the state of the player.
 
+    The values are used as the small image key in the RPC data.
+    """
     STOPPED = "stopped"
     PAUSED = "paused"
     PLAYING = "playing"
@@ -19,8 +25,10 @@ class PlayerState(Enum):
 
 @dataclass
 class ItunesReport:
-    """Represents a report of the current track in iTunes. If the player is stopped, all fields will be empty."""
+    """Represents a report of the current track in iTunes.
 
+    If the player is stopped, all fields will be empty.
+    """
     name: str
     artist: str
     album: str
@@ -32,12 +40,13 @@ class ItunesReport:
     position: int
     state: PlayerState
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: "ItunesReport") -> bool:
         if not isinstance(other, ItunesReport):
             return False
 
         return self.track_id == other.track_id and self.state == other.state
 
+    @staticmethod
     def create_empty() -> "ItunesReport":
         """Creates an empty report.
 
@@ -56,6 +65,25 @@ class ItunesReport:
             state=PlayerState.STOPPED,
         )
 
+    @property
+    def lastfm_url(self) -> str:
+        """Gets the Last.fm URL for the track.
+
+        :return: Last.fm URL
+        """
+        return f"https://www.last.fm/music/{urllib.parse.quote(self.artist.replace(' ', '+'))}/_/{urllib.parse.quote(self.name.replace(' ', '+'))}"
+
+    @property
+    def exists_on_lastfm(self) -> bool:
+        """Checks if the track exists on Last.fm.
+
+        :return: Whether or not the track exists
+        """
+        page = requests.get(self.lastfm_url)
+        soup = BeautifulSoup(page.content, "html.parser")
+
+        return "Page Not Found" not in soup.title.string
+
     def to_rpc_data(self) -> dict[str, Union[str, int]]:
         """Creates a dictionary of the report's data to be used by the RPC client.
 
@@ -65,7 +93,7 @@ class ItunesReport:
 
         if self.state == PlayerState.STOPPED:
             rpc_data["details"] = "Idling"
-            rpc_data["large_image"] = "music-2013"
+            rpc_data["large_image"] = "itunes-12"
 
             return rpc_data
 
@@ -76,23 +104,28 @@ class ItunesReport:
         if self.artist:
             rpc_data["state"] = f"by {self.artist}"
         else:
-            rpc_data["state"] = None
+            rpc_data["state"] = ""
 
         if self.album and self.year:
             rpc_data["large_text"] = f"{self.album} ({self.year})"
         elif self.album:
             rpc_data["large_text"] = self.album
         else:
-            rpc_data["large_text"] = None
+            rpc_data["large_text"] = ""
 
         if self.artwork_url:
             rpc_data["large_image"] = self.artwork_url
         else:
-            rpc_data["large_image"] = "music-2013"
+            rpc_data["large_image"] = "itunes-12"
 
         if self.state == PlayerState.PLAYING:
-            rpc_data["start"] = int(time.time()) - self.position
-            rpc_data["end"] = int(time.time()) + (self.duration - self.position)
+            rpc_data["start"] = max(0, int(time.time()) - self.position)
+            rpc_data["end"] = max(0, int(time.time()) + (self.duration - self.position))
+
+        if self.exists_on_lastfm:
+            rpc_data["buttons"] = [
+                {"label": "Last.fm", "url": self.lastfm_url},
+            ]
 
         return rpc_data
 
@@ -149,7 +182,7 @@ class ItunesPlayer:
             album=current_track.Album,
             year=current_track.Year,
             artwork=current_track.Artwork.Item(1) if current_track.Artwork else None,
-            artwork_url=None,
+            artwork_url="",
             duration=current_track.Duration,
             track_id=current_track.TrackID,
             position=self._player.PlayerPosition,

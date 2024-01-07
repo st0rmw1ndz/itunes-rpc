@@ -11,8 +11,8 @@ itunes: Union[ItunesPlayer, None] = None
 rpc: Union[RPCHandler, None] = None
 saved_track: Union[ItunesReport, None] = None
 
-SLEEP_TIME: int = 1
-DISCORD_CLIENT_ID: int = 1159337432840421447
+SLEEP_TIME = 1
+DISCORD_CLIENT_ID = 1159337432840421447
 
 
 def initialize() -> None:

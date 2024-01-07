@@ -1,7 +1,10 @@
+# TODO: Rework into an abstract class so that it can be used with other services
+
 __all__ = ["get_artwork_url"]
 
 import hashlib
 import json
+from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any, Tuple, Union
 
@@ -11,11 +14,11 @@ from pyimgur import Imgur
 
 from .itunes import ItunesReport
 
-IMGUR_CLIENT_ID: str = "865213c7a7bab4f"
-ARTWORK_SIZE: Tuple[int, int] = (512, 512)
+IMGUR_CLIENT_ID = "865213c7a7bab4f"
+ARTWORK_SIZE = (512, 512)
 
-artwork_path: Path = Path.cwd() / "data/artwork.jpg"
-hashes_path: Path = Path.cwd() / "data/hashes.json"
+artwork_path = Path.cwd() / "data/artwork.jpg"
+hashes_path = Path.cwd() / "data/hashes.json"
 
 
 def save_artwork(artwork: Any) -> bool:

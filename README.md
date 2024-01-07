@@ -13,7 +13,8 @@ Shows the current track in iTunes on Discord. Best suited for tracks that have p
 
 ## What needs to work?
 
-- More uploader support, and use a proper uploader abstract class system
+- More image uploader support, and use a proper uploader abstract class system
+  - Platforms to be added: [OwO]("https://whats-th.is"), [Catbox]("https://catbox.moe").
 - Configuration options, such as the image to use when idling, and the idling string
 - Command line interface to provide options as well
 

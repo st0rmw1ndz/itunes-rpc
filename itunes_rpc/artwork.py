@@ -8,11 +8,12 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any, Tuple, Union
 
+import requests.exceptions
 from loguru import logger
 from PIL import Image
 from pyimgur import Imgur
 
-from .itunes import ItunesReport
+from itunes_rpc.itunes import ItunesReport
 
 IMGUR_CLIENT_ID = "865213c7a7bab4f"
 ARTWORK_SIZE = (512, 512)
@@ -99,22 +100,24 @@ def get_current_url() -> str:
     return hashes[get_current_md5()] if check_hash_exists() else None
 
 
-def get_artwork_url(report: Union[ItunesReport, None]) -> Union[str, None]:
+def get_artwork_url(report: Union[ItunesReport, None]) -> str:
     """Gets the artwork URL for the report.
 
     :param report: Report to get artwork URL for
     :return: Artwork URL
     """
     if report.artwork is None:
-        report.artwork_url = None
-        return
+        return ""
 
     if not save_artwork(report.artwork):
-        return None
+        return ""
 
     if check_hash_exists():
         return get_current_url()
     else:
-        url = upload_artwork()
-        dump_hash(url)
-        return url
+        try:
+            url = upload_artwork()
+            dump_hash(url)
+            return url
+        except requests.exceptions.HTTPError:
+            return ""

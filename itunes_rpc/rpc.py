@@ -1,7 +1,7 @@
 import pypresence
 from pypresence import Presence
 
-from .itunes import ItunesReport
+from itunes_rpc.itunes import ItunesReport
 
 
 class RPCHandler:

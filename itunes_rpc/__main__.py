@@ -2,10 +2,10 @@ import sys
 import time
 from typing import Union
 
-from .artwork import get_artwork_url
-from .data import ensure_structure_ready
-from .itunes import ItunesPlayer, ItunesReport, PlayerState
-from .rpc import RPCHandler
+from itunes_rpc.artwork import get_artwork_url
+from itunes_rpc.data import ensure_structure_ready
+from itunes_rpc.itunes import ItunesPlayer, ItunesReport, PlayerState
+from itunes_rpc.rpc import RPCHandler
 
 itunes: Union[ItunesPlayer, None] = None
 rpc: Union[RPCHandler, None] = None

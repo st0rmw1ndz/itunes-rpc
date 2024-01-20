@@ -12,12 +12,15 @@ import requests
 import win32com.client
 from bs4 import BeautifulSoup
 
+LASTFM_BASE_URL = "https://www.last.fm/music/{artist}/_/{track}"
+
 
 class PlayerState(Enum):
     """Represents the state of the player.
 
     The values are used as the small image key in the RPC data.
     """
+
     STOPPED = "stopped"
     PAUSED = "paused"
     PLAYING = "playing"
@@ -29,11 +32,12 @@ class ItunesReport:
 
     If the player is stopped, all fields will be empty.
     """
+
     name: str
     artist: str
     album: str
     year: int
-    artwork: Any
+    artwork: Union[Any, None]
     artwork_url: str
     duration: int
     track_id: int
@@ -71,7 +75,10 @@ class ItunesReport:
 
         :return: Last.fm URL
         """
-        return f"https://www.last.fm/music/{urllib.parse.quote(self.artist.replace(' ', '+'))}/_/{urllib.parse.quote(self.name.replace(' ', '+'))}"
+        return LASTFM_BASE_URL.format(
+            artist=urllib.parse.quote(self.artist.replace(" ", "+")),
+            track=urllib.parse.quote(self.name.replace(" ", "+")),
+        )
 
     @property
     def exists_on_lastfm(self) -> bool:
@@ -122,10 +129,10 @@ class ItunesReport:
             rpc_data["start"] = max(0, int(time.time()) - self.position)
             rpc_data["end"] = max(0, int(time.time()) + (self.duration - self.position))
 
-        if self.exists_on_lastfm:
-            rpc_data["buttons"] = [
-                {"label": "Last.fm", "url": self.lastfm_url},
-            ]
+        # if self.exists_on_lastfm:
+        #     rpc_data["buttons"] = [
+        #         {"label": "Last.fm", "url": self.lastfm_url},
+        #     ]
 
         return rpc_data
 

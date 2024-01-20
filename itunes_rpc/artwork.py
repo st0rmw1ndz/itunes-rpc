@@ -4,9 +4,8 @@ __all__ = ["get_artwork_url"]
 
 import hashlib
 import json
-from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any, Tuple, Union
+from typing import Any, Union
 
 import requests.exceptions
 from loguru import logger

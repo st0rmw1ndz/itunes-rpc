@@ -7,7 +7,6 @@ from enum import Enum
 from typing import Any, Union
 
 import psutil
-import pypresence
 import requests
 import win32com.client
 from bs4 import BeautifulSoup

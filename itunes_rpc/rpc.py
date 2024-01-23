@@ -13,3 +13,6 @@ class RPCHandler:
 
     def close(self) -> None:
         self._client.close()
+
+    def clear(self) -> None:
+        self._client.clear()

@@ -21,23 +21,17 @@ artwork_path = Path.cwd() / "data/artwork.jpg"
 hashes_path = Path.cwd() / "data/hashes.json"
 
 
-def save_artwork(artwork: Any) -> bool:
+def save_artwork(artwork: Any) -> None:
     """Saves the artwork to a file and resizes it.
 
     :param artwork: Artwork to use
-    :return: Whether or not it was successful
+    :return: None
     """
-    try:
-        artwork.SaveArtworkToFile(artwork_path)
+    artwork.SaveArtworkToFile(artwork_path)
 
-        im = Image.open(artwork_path)
-        im = im.resize(ARTWORK_SIZE)
-        im.save(artwork_path)
-
-        return True
-    except Exception as e:
-        logger.warning(f"Unable to save artwork, does the track have artwork?\n{e}")
-        return False
+    im = Image.open(artwork_path)
+    im = im.resize(ARTWORK_SIZE)
+    im.save(artwork_path)
 
 
 def upload_artwork() -> str:
@@ -108,7 +102,10 @@ def get_artwork_url(report: Union[ItunesReport, None]) -> str:
     if report.artwork is None:
         return ""
 
-    if not save_artwork(report.artwork):
+    try:
+        save_artwork(report.artwork)
+    except Exception as e:
+        print(f"Something went wrong saving the artwork.\n{e}")
         return ""
 
     if check_hash_exists():
